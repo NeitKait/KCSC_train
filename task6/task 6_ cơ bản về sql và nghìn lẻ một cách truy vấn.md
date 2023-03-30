@@ -1,9 +1,32 @@
 # task 6: cơ bản về sql và nghìn lẻ một cách truy vấn
 
-Về cơ bản, SQL là một ngôn ngữ tiêu chuẩn để lưu trữ, thao tác và truy xuất dữ liệu trong cơ sở dữ liệu.
+SQL được viết tắt từ Structured Query Language, là ngôn ngữ truy vấn có cấu trúc. Về cơ bản, Ngôn ngữ truy vấn có cấu trúc này được sử dụng để truy xuất dữ liệu hoặc giao diện khác như tạo, xóa trong cơ sở dữ liệu, lấy các hàng và sửa đổi các hàng .v.v. với cơ sở dữ liệu quan hệ.
+
+SQL cho phép bạn truy cập và thao tác cơ sở dữ liệu. Nó là ngôn ngữ được dành riêng cho sử dụng trong lập trình và được thiết kế quản lý dữ liệu được giữ trong hệ thống quản lý cơ sở dữ liệu quan hệ hoặc để xử lý luồng trong hệ thống quản lý luồng dữ liệu quan hệ. SQL được sử dụng để giao tiếp với cơ sở dữ liệu.
 
 Một cơ sở dữ liệu thường chứa một hoặc nhiều bảng. Mỗi bảng được xác định bằng một tên. Bảng chứa các bản ghi với dữ liệu. Trong task này chúng ta sẽ sử dụng mẫu database Northwind.
 ![](https://i.imgur.com/NaPcoqn.png)
+
+# SQL có chức năng gì
+
+* Với SQL, người dùng có thể thực thi các truy vấn đối với cơ sở dữ liệu
+* Lấy dữ liệu từ cơ sở dữ liệu
+* Chèn các records (bản ghi) trong cơ sở dữ liệu
+* Cập nhật các records trong cơ sở dữ liệu
+* Xóa các bản ghi từ cơ sở dữ liệu
+* Tạo cơ sở dữ liệu mới
+* Tạo các thủ tục được lưu trữ trong cơ sở dữ liệu
+* Tạo các view, stored procedure, functions trong cơ sở dữ liệu
+* SQL còn cho phép thiết lập quyền truy cập trên bảng, procedure và view
+
+# Cấu trúc của một câu truy vấn
+
+SELECT <Danh sách các cột>
+FROM <Danh sách Bảng>
+WHERE <Các điều kiện>
+GROUP BY <Tên cột>
+HAVING <Điều kiện dựa trên GROUP BY>
+ORDER BY <Danh sách cột>
 
 # Một số câu lệnh phổ biến. 
 
