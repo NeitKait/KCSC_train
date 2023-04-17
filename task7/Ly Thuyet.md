@@ -27,6 +27,8 @@ có 3 loại chính là
 * Không hiển thị exception, message lỗi: Hacker dựa vào message lỗi để tìm ra cấu trúc database. Khi có lỗi, ta chỉ hiện thông báo lỗi chứ đừng hiển thị đầy đủ thông tin về lỗi, tránh hacker lợi dụng.
 * Phân quyền rõ ràng trong DB: Nếu chỉ truy cập dữ liệu từ một số bảng, hãy tạo một account trong DB, gán quyền truy cập cho account đó chứ đừng dùng account root hay sa. Lúc này, dù hacker có inject được sql cũng không thể đọc dữ liệu từ các bảng chính, sửa hay xoá dữ liệu.
 * Backup dữ liệu thường xuyên: Các cụ có câu “cẩn tắc vô áy náy”. Dữ liệu phải thường xuyên được backup để nếu có bị hacker xoá thì ta vẫn có thể khôi phục được.
+
+* môt phương pháp khác vô cùng hữu dụng và được sử dụng phổ biến ngày nay chính là bind-param. Việc này vừa giúp giảm thiểu thời gian phân tích cú pháp vừa giảm thiểu băng thông đến máy chủ và hơn hết là chống SQLi rất hữu hiệu.  
 ## 6. cách khai thác SQL 
 ### cách phát hiện
 * Gửi dấu nháy đơn ' , nháy kép ", chấm phẩy ;, ký tự comment như --, #,... và chờ kết quả phản hồi của web.
