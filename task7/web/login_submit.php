@@ -6,11 +6,9 @@
         $username= $_POST["username"];
         $password= $_POST["password"];
         $password= md5($password);
-        $sql = "SELECT * FROM user WHERE username='$username' and password='$password' LIMIT 1";
-        $result = mysqli_query($conn, $sql);
+        $result = mysqli_query($conn, "SELECT * FROM user WHERE username='$username' and password='$password' LIMIT 1");
        if($result){
             $row = mysqli_fetch_assoc($result);
-            var_dump($row);
             if( $row > 0){
                 $_SESSION["user"]=$username; 
                 echo "You are dang nhap thanh cong";
