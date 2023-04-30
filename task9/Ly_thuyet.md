@@ -26,7 +26,6 @@ Về cơ bản, để ngăn chặn file upload vulnerabilities thì bạn chỉ 
 * Sử dụng các framework xử lý file upload chuẩn đã được kiểm tra thử nghiệm thay vì chơi hàng “nhà tự trồng” (trừ trường hợp bạn bắt buộc phải làm thế)
 
 ## Khai thác lỗ hổng:
-https://viblo.asia/p/khai-thac-loi-unrestricted-file-upload-va-cac-ky-thuat-bypass-Ljy5VyNblra
 ### Client side
 Một số ứng dụng web sử dụng javascript để ngăn chặn việc người dùng upload những file độc hại lên phía server. Ví dụ, đối với chức năng upload ảnh, người phát triển ứng dụng mong muốn người dùng chỉ upload các file ảnh có đuôi .jpg, .png, .gif. Do đó, anh ta sử dụng javascript để kiểm tra file được upload lên có phần đuôi là gì, nếu nó là file ảnh thì sẽ không có vấn đề gì, còn nếu là file độc hại ví dụ: .php, .exe thì sẽ pop-up thông báo file không được phép upload.
 
